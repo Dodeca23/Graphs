@@ -36,27 +36,6 @@ public class FunctionLibrary : ScriptableObject
         }
     }
 
-    public void GetFunction(Vector3 localPos, float u, float v, float t)
-    {
-        //switch (function)
-        //{
-        //    case Functions.Wave:
-        //        return Wave(u, v, t);
-        //    case Functions.MultiWave:
-        //        return MultiWave(u, v, t);
-        //    case Functions.Ripple:
-        //        return Ripple(u, v, t);
-        //    case Functions.Sphere:
-        //        return Sphere(u, v, t);
-        //    case Functions.Torus:
-        //        return Torus(u, v, t);
-        //    case Functions.Morph:
-        //        return Morph(u, v, t);
-        //    default:
-        //        Debug.LogError("No function assigned.");
-        //        return null;
-        //}
-    }
 
     #endregion
 
