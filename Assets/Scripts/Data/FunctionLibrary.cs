@@ -36,6 +36,28 @@ public class FunctionLibrary : ScriptableObject
         }
     }
 
+    public void GetFunction(Vector3 localPos, float u, float v, float t)
+    {
+        //switch (function)
+        //{
+        //    case Functions.Wave:
+        //        return Wave(u, v, t);
+        //    case Functions.MultiWave:
+        //        return MultiWave(u, v, t);
+        //    case Functions.Ripple:
+        //        return Ripple(u, v, t);
+        //    case Functions.Sphere:
+        //        return Sphere(u, v, t);
+        //    case Functions.Torus:
+        //        return Torus(u, v, t);
+        //    case Functions.Morph:
+        //        return Morph(u, v, t);
+        //    default:
+        //        Debug.LogError("No function assigned.");
+        //        return null;
+        //}
+    }
+
     #endregion
 
     #region Private Functions
@@ -101,5 +123,11 @@ public class FunctionLibrary : ScriptableObject
         return p;
     }
 
+    public Vector3 Morph(float u, float v, float t, float progress = 0f, Vector3? from = null , Vector3? to = null) =>
+        Vector3.LerpUnclamped((Vector3)from, (Vector3)to, SmoothStep(0f, 1f, (float)progress));
+    
+
     #endregion
+
+    
 }
