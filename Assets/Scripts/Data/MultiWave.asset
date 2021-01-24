@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: MultiWave
   m_EditorClassIdentifier: 
   function: 1
+  indexNumber: 1

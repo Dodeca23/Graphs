@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: Ripple
   m_EditorClassIdentifier: 
   function: 2
+  indexNumber: 2

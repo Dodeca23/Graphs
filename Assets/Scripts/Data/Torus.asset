@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: Torus
   m_EditorClassIdentifier: 
   function: 4
+  indexNumber: 4
