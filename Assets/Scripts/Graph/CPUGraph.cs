@@ -1,17 +1,25 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class Graph : MonoBehaviour
+public class CPUGraph : MonoBehaviour
 {
     #region Fields
 
     enum TransitionMode { Cycle, Random }
 
-    [Tooltip("Prefab of a single point of a graph.")]
+    private const int maxResolution = 1000;
+
+    [Tooltip("Computeshader used by the CPU Graph.")]
     [SerializeField]
-    private Transform pointPrefab = default;
+    private ComputeShader computeShader = default;
+    [Tooltip("Material used for the mesh.")]
+    [SerializeField]
+    private Material material = default;
+    [Tooltip("Mesh used to draw the objects.")]
+    [SerializeField]
+    private Mesh mesh = default;
     [Tooltip("Height and width of the graph.")]
-    [SerializeField, Range(10, 100)]
+    [SerializeField, Range(10, maxResolution)]
     private int resolution = 10;
     [Tooltip("Collection of the available functions.")]
     [SerializeField]
@@ -26,12 +34,19 @@ public class Graph : MonoBehaviour
     [SerializeField]
     private TransitionMode transitionMode = TransitionMode.Cycle;
 
+    private static readonly int
+        positionsID = Shader.PropertyToID("_Positions"),
+        resolutionID = Shader.PropertyToID("_Resolution"),
+        stepID = Shader.PropertyToID("_Step"),
+        timeID = Shader.PropertyToID("_Time"),
+        transitionProgressiD = Shader.PropertyToID("_TransitionProgress");
+
+    private ComputeBuffer positionsBuffer;
 
     private FunctionLibrary function;
     private FunctionLibrary previousFunction;
     private FunctionLibrary currentFunction;
 
-    private Transform[] points;
     private float duration;
     private int currentIndex;
     private bool transitioning;
@@ -42,17 +57,13 @@ public class Graph : MonoBehaviour
 
     private void OnEnable()
     {
-        currentIndex = 0;
-        float step = 2f / resolution;
-        Vector3 scale = Vector3.one * step;
-        points = new Transform[resolution * resolution];
-        for (int i = 0; i < points.Length; i++)
-        {
-            Transform point = Instantiate(pointPrefab) as Transform;
-            point.localScale = scale;
-            point.SetParent(transform, false);
-            points[i] = point;
-        }
+        positionsBuffer = new ComputeBuffer(maxResolution * maxResolution, 3 * 4);
+    }
+
+    private void OnDisable()
+    {
+        positionsBuffer.Release();
+        positionsBuffer = null;
     }
 
     private void Update()
@@ -84,62 +95,10 @@ public class Graph : MonoBehaviour
             currentFunction = function;
         }
 
-        if(function != null)
-        {
-            if (transitioning)
-                UpdateFunctionTransition();
-            else
-                UpdateFunction();
-        }
-
+        UpdateFunctionOnGPU();
     }
 
-    #endregion
-
-    #region Updating
-    private void UpdateFunction()
-    {
-        float time = Time.time;
-        float step = 2f / resolution;
-        float v = 0.5f * step - 1f;
-        for (int i = 0, x = 0, z = 0; i < points.Length; i++, x++)
-        {
-            if (x == resolution)
-            {
-                x = 0;
-                z += 1;
-                v = (z + 0.5f) * step - 1f;
-            }
-
-            float u = (x + 0.5f) * step - 1f;
-            points[i].localPosition = (Vector3)function.GetFunction(u, v, time);
-        }
-    }
-
-    private void UpdateFunctionTransition()
-    {
-        float progress = duration / transitionDuration;
-        float time = Time.time;
-        float step = 2f / resolution;
-        float v = 0.5f * step - 1f;
-        for (int i = 0, x = 0, z = 0; i < points.Length; i++, x++)
-        {
-            if (x == resolution)
-            {
-                x = 0;
-                z += 1;
-                v = (z + 0.5f) * step - 1f;
-            }
-
-            float u = (x + 0.5f) * step - 1f;
-            Vector3 fromFunction = (Vector3)previousFunction.GetFunction(u, v, time);
-            Vector3 toFunction = (Vector3)currentFunction.GetFunction(u, v, time);
-            points[i].localPosition = (Vector3)function.Morph(u, v, time, progress, fromFunction, toFunction);
-        }
-    }
-
-
-    #endregion
+    #endregion    
 
     #region Function Returns
     private FunctionLibrary GetFunction(int index) =>
@@ -157,6 +116,37 @@ public class Graph : MonoBehaviour
         function = transitionMode == TransitionMode.Cycle ?
             GetFunction(currentIndex) : GetRandomFunction();
         currentFunction = function;
+    }
+
+    #endregion
+
+    #region Compute Shader
+
+    private void UpdateFunctionOnGPU()
+    {
+        float step = 2f / resolution;
+        computeShader.SetInt(resolutionID, resolution);
+        computeShader.SetFloat(stepID, step);
+        computeShader.SetFloat(timeID, Time.time);
+        if (transitioning)
+        {
+            computeShader.SetFloat(
+                transitionProgressiD,
+                Mathf.SmoothStep(0f, 1f, duration / transitionDuration));
+        }
+
+
+        int kernelIndex = function.indexNumber + (int)(transitioning ?
+        previousFunction.indexNumber : currentFunction.indexNumber) * function.GetFunctionCount();
+        computeShader.SetBuffer(kernelIndex, positionsID, positionsBuffer);
+
+        int groups = Mathf.CeilToInt(resolution / 8f);
+        computeShader.Dispatch(kernelIndex, groups, groups, 1);
+
+        material.SetBuffer(positionsID, positionsBuffer);
+        material.SetFloat(stepID, step);
+        var bounds = new Bounds(Vector3.zero, Vector3.one * (2f + 2f / resolution));
+        Graphics.DrawMeshInstancedProcedural(mesh, 0, material, bounds, resolution * resolution);
     }
 
     #endregion

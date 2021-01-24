@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: Sphere
   m_EditorClassIdentifier: 
   function: 3
+  indexNumber: 3

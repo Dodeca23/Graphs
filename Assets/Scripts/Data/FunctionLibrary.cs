@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using static UnityEngine.Mathf;
 
 [CreateAssetMenu(menuName =("FunctionLibrary/Function"))]
@@ -12,7 +13,7 @@ public class FunctionLibrary : ScriptableObject
     };
 
     public Functions function;
-
+    public int indexNumber;
     #endregion
 
     #region Public Get Method
@@ -36,7 +37,9 @@ public class FunctionLibrary : ScriptableObject
         }
     }
 
-
+    public int GetFunctionCount() =>
+        Enum.GetNames(typeof(Functions)).Length;
+    
     #endregion
 
     #region Private Functions
