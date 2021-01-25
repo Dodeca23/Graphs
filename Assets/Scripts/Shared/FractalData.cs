@@ -10,19 +10,21 @@ public class FractalData : ScriptableObject
     [Range(1, 8)]
     public int depth;
     public Mesh mesh;
+    public Mesh leafMesh;
     public Material material;
 
-    float3[] directions = {
+
+    protected float3[] directions = {
         up(), right(), left(), forward(), back()
     };
 
-    quaternion[] rotations = {
+    protected quaternion[] rotations = {
         quaternion.identity,
         quaternion.RotateZ(-0.5f * PI), quaternion.RotateZ(0.5f * PI),
         quaternion.RotateX(0.5f * PI), quaternion.RotateX(-0.5f * PI)
     };
 
-    public FractalPart CreatePart(int childIndex)
+    public virtual FractalPart CreatePart(int childIndex)
     {
         return new FractalPart
         {
