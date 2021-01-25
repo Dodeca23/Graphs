@@ -1,6 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using Unity.Mathematics;
+
+using static Unity.Mathematics.math;
+using quaternion = Unity.Mathematics.quaternion;
 
 [CreateAssetMenu(menuName =("Fractal/FractalData"))]
 public class FractalData : ScriptableObject
@@ -10,14 +12,14 @@ public class FractalData : ScriptableObject
     public Mesh mesh;
     public Material material;
 
-    Vector3[] directions = {
-        Vector3.up, Vector3.right, Vector3.left, Vector3.forward, Vector3.back
+    float3[] directions = {
+        up(), right(), left(), forward(), back()
     };
 
-    Quaternion[] rotations = {
-        Quaternion.identity,
-        Quaternion.Euler(0f, 0f, -90f), Quaternion.Euler(0f, 0f, 90f),
-        Quaternion.Euler(90f, 0f, 0f), Quaternion.Euler(-90f, 0f, 0f)
+    quaternion[] rotations = {
+        quaternion.identity,
+        quaternion.RotateZ(-0.5f * PI), quaternion.RotateZ(0.5f * PI),
+        quaternion.RotateX(0.5f * PI), quaternion.RotateX(-0.5f * PI)
     };
 
     public FractalPart CreatePart(int childIndex)
