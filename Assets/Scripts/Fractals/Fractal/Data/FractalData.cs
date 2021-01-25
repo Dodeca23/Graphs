@@ -20,19 +20,12 @@ public class FractalData : ScriptableObject
         Quaternion.Euler(90f, 0f, 0f), Quaternion.Euler(-90f, 0f, 0f)
     };
 
-    public FractalPart CreatePart(Transform t, int levelIndex, int childIndex, float scale)
+    public FractalPart CreatePart(int childIndex)
     {
-        GameObject go = new GameObject("Fractal Part L" + levelIndex + " C" + childIndex);
-        go.transform.localScale = scale * Vector3.one;
-        go.transform.SetParent(t, false);
-        go.AddComponent<MeshFilter>().mesh = mesh;
-        go.AddComponent<MeshRenderer>().material = material;
-
         return new FractalPart
         {
             direction = directions[childIndex],
-            rotation = rotations[childIndex],
-            transform = go.transform
+            rotation = rotations[childIndex]
         };
     }
 }

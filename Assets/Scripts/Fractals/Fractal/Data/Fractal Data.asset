@@ -14,4 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   depth: 4
   mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
-  material: {fileID: 2100000, guid: 053482e3192577e44819ad9b9fc3190d, type: 2}
+  material: {fileID: 2100000, guid: 33845b794f8a0fd41b31368caecfbbe9, type: 2}
